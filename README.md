@@ -4,7 +4,7 @@
 #关于使用到的东西
 前面使用"*"为deepseek优化版（就是加了点效果）
 deepseek写骨架（50%）
-https://wiki.connect.qq.com/
+QQsdk网站：https://wiki.connect.qq.com/
 qq头像api https://q1.qlogo.cn/g?b=qq&nk=804498637&s=640
 
 *（https://klpbbs.com/tool/cps/
