@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords" content="CPS测试,点击速度测试,手速测试,免费测试">
+    <meta name="description" content="专业的CPS测试工具，帮助您测试点击速度和手速">
+    <title>专业CPS测试工具</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdui@1.0.1/dist/css/mdui.min.css" integrity="sha384-cLRrMq39HOZdvE0j6yBojO4+1PrHfB7a9l5qLcmRm/fiWXYY+CndJPmyu5FV/9Tw" crossorigin="anonymous">
+    <style>
+        .cps-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-area {
+            transition: all 0.3s ease;
+        }
+        .test-button {
+            height: 200px;
+            font-size: 2rem;
+            transition: all 0.1s ease;
+        }
+        .test-button:active {
+            transform: scale(0.95);
+            background-color: #1e88e5 !important;
+        }
+        .results-container {
+            display: none;
+        }
+        .history-item {
+            border-left: 4px solid #2196f3;
+            padding-left: 10px;
+            margin-bottom: 10px;
+        }
+        .progress-container {
+            height: 10px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: #2196f3;
+            width: 100%;
+            transition: width 1s linear;
+        }
+        .mode-selector {
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        @media (max-width: 600px) {
+            .test-button {
+                height: 150px;
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body class="mdui-theme-primary-indigo mdui-theme-accent-blue mdui-theme-layout-auto">
+    <div class="cps-container">
+        <div class="mdui-typo">
+            <h1 class="mdui-text-center">专业CPS测试工具</h1>
+            <p class="mdui-text-center">测试您的点击速度和手速</p>
+        </div>
+
+        <div class="mdui-card mdui-m-t-2">
+            <div class="mdui-card-content">
+                <div class="mode-selector">
+                    <h3>选择测试模式</h3>
+                    <div class="mdui-btn-group mdui-m-b-2">
+                        <button class="mdui-btn mdui-btn-outlined" data-time="5">5秒测试</button>
+                        <button class="mdui-btn mdui-btn-raised mdui-color-theme-accent" data-time="10">10秒测试</button>
+                        <button class="mdui-btn mdui-btn-outlined" data-time="30">30秒测试</button>
+                        <button class="mdui-btn mdui-btn-outlined" data-time="60">60秒测试</button>
+                    </div>
+                </div>
+
+                <div class="test-area" id="testArea">
+                    <div class="mdui-progress mdui-m-b-2">
+                        <div class="mdui-progress-determinate" id="progressBar" style="width: 100%;"></div>
+                    </div>
+                    
+                    <div class="mdui-text-center mdui-m-b-2">
+                        <span class="mdui-typo-title">剩余时间：<span id="time">10</span>秒</span>
+                        <span class="mdui-typo-title mdui-m-l-2">点击次数：<span id="times">0</span>次</span>
+                        <span class="mdui-typo-title mdui-m-l-2">当前CPS：<span id="currentCps">0.0</span></span>
+                    </div>
+                    
+                    <div class="mdui-col mdui-p-l-2 mdui-m-t-1 mdui-p-r-2 mdui-m-b-4">
+                        <button id="startButton" class="mdui-btn mdui-btn-raised mdui-btn-block mdui-color-theme-accent test-button">
+                            <h1>点击开始测试</h1>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="results-container" id="resultsContainer">
+                    <h3 class="mdui-text-center">测试结束</h3>
+                    <div class="mdui-row">
+                        <div class="mdui-col-xs-6 mdui-col-sm-3">
+                            <div class="stat-card mdui-color-blue-50">
+                                <div class="mdui-typo-subheading">总点击次数</div>
+                                <div class="mdui-typo-headline" id="totalClicks">0</div>
+                            </div>
+                        </div>
+                        <div class="mdui-col-xs-6 mdui-col-sm-3">
+                            <div class="stat-card mdui-color-green-50">
+                                <div class="mdui-typo-subheading">平均CPS</div>
+                                <div class="mdui-typo-headline" id="averageCps">0.0</div>
+                            </div>
+                        </div>
+                        <div class="mdui-col-xs-6 mdui-col-sm-3">
+                            <div class="stat-card mdui-color-amber-50">
+                                <div class="mdui-typo-subheading">最高CPS</div>
+                                <div class="mdui-typo-headline" id="maxCps">0.0</div>
+                            </div>
+                        </div>
+                        <div class="mdui-col-xs-6 mdui-col-sm-3">
+                            <div class="stat-card mdui-color-red-50">
+                                <div class="mdui-typo-subheading">测试时长</div>
+                                <div class="mdui-typo-headline" id="testDuration">0s</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mdui-text-center mdui-m-t-3">
+                        <button id="restartButton" class="mdui-btn mdui-btn-raised mdui-color-theme-accent">重新测试</button>
+                        <button id="shareButton" class="mdui-btn mdui-btn-raised mdui-color-theme">分享成绩</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mdui-card mdui-m-t-2">
+            <div class="mdui-card-content">
+                <h3>测试历史</h3>
+                <div id="historyList">
+                    <p class="mdui-text-center mdui-text-color-grey">暂无测试记录</p>
+                </div>
+                <div class="mdui-text-center mdui-m-t-2">
+                    <button id="clearHistory" class="mdui-btn mdui-btn-outlined">清除历史记录</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="mdui-panel mdui-panel-gapless mdui-m-t-2" mdui-panel>
+            <div class="mdui-panel-item">
+                <div class="mdui-panel-item-header">
+                    更多操作选项
+                    <i class="mdui-panel-item-arrow mdui-icon material-icons">keyboard_arrow_down</i>
+                </div>
+                <div class="mdui-panel-item-body">
+                    <div class="mdui-btn-group mdui-m-t-1">
+                        <button class="mdui-btn mdui-btn-raised mdui-ripple mdui-color-theme-accent" onclick="history.back()">返回前页</button>
+                        <a href="https://klpbbs.com/" class="mdui-btn mdui-m-l-1 mdui-btn-raised mdui-ripple mdui-color-theme-accent">访问苦力怕论坛</a>
+                    </div>
+                    <div class="mdui-btn-group mdui-m-t-1">
+                        <button class="mdui-btn mdui-btn-raised mdui-ripple mdui-color-theme-accent" mdui-dialog="{target: '#aboutPages'}">关于本页</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mdui-dialog" id="aboutPages">
+        <div class="mdui-dialog-title">关于 About</div>
+        <div class="mdui-dialog-content">
+            本页面由 @苦力怕纸 开发<br>
+            框架使用开源项目：MDUI<br>
+            本页仓库：<a href="https://github.com/klpbbs/CPS-Test" target="_blank">CPS-Test</a><br>
+            苦力怕论坛，有你更精彩~
+        </div>
+        <div class="mdui-dialog-actions">
+            <button class="mdui-btn mdui-ripple" mdui-dialog-close>关闭</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/mdui@1.0.1/dist/js/mdui.min.js" integrity="sha384-gCMZcshYKOGRX9r6wbDrvF+TcCCswSHFucUzUPwka+Gr+uHgjlYvkABr95TCOz3A" crossorigin="anonymous"></script>
+    <script>
+        // 状态变量
+        let state = {
+            isTesting: false,
+            clickCount: 0,
+            timeLeft: 10,
+            totalTime: 10,
+            timerId: null,
+            startTime: null,
+            lastClickTime: null,
+            maxCps: 0,
+            history: []
+        };
+
+        // DOM元素
+        const elements = {
+            time: document.getElementById('time'),
+            times: document.getElementById('times'),
+            currentCps: document.getElementById('currentCps'),
+            startButton: document.getElementById('startButton'),
+            progressBar: document.getElementById('progressBar'),
+            testArea: document.getElementById('testArea'),
+            resultsContainer: document.getElementById('resultsContainer'),
+            totalClicks: document.getElementById('totalClicks'),
+            averageCps: document.getElementById('averageCps'),
+            maxCps: document.getElementById('maxCps'),
+            testDuration: document.getElementById('testDuration'),
+            restartButton: document.getElementById('restartButton'),
+            shareButton: document.getElementById('shareButton'),
+            historyList: document.getElementById('historyList'),
+            clearHistory: document.getElementById('clearHistory')
+        };
+
+        // 初始化
+        function init() {
+            // 加载历史记录
+            loadHistory();
+            
+            // 绑定事件
+            bindEvents();
+            
+            // 更新模式按钮状态
+            updateModeButtons();
+        }
+
+        // 绑定事件
+        function bindEvents() {
+            // 开始按钮点击事件
+            elements.startButton.addEventListener('click', handleStartClick);
+            
+            // 重新测试按钮
+            elements.restartButton.addEventListener('click', resetTest);
+            
+            // 分享按钮
+            elements.shareButton.addEventListener('click', shareResults);
+            
+            // 清除历史记录
+            elements.clearHistory.addEventListener('click', clearHistory);
+            
+            // 模式选择按钮
+            document.querySelectorAll('.mode-selector button').forEach(button => {
+                button.addEventListener('click', function() {
+                    setTestTime(parseInt(this.getAttribute('data-time')));
+                    updateModeButtons();
+                });
+            });
+        }
+
+        // 设置测试时间
+        function setTestTime(seconds) {
+            state.totalTime = seconds;
+            state.timeLeft = seconds;
+            elements.time.textContent = seconds;
+            updateProgressBar();
+        }
+
+        // 更新模式按钮状态
+        function updateModeButtons() {
+            document.querySelectorAll('.mode-selector button').forEach(button => {
+                const time = parseInt(button.getAttribute('data-time'));
+                if (time === state.totalTime) {
+                    button.classList.add('mdui-color-theme-accent');
+                    button.classList.remove('mdui-btn-outlined');
+                } else {
+                    button.classList.remove('mdui-color-theme-accent');
+                    button.classList.add('mdui-btn-outlined');
+                }
+            });
+        }
+
+        // 处理开始按钮点击
+        function handleStartClick() {
+            if (!state.isTesting) {
+                startTest();
+            } else {
+                registerClick();
+            }
+        }
+
+        // 开始测试
+        function startTest() {
+            state.isTesting = true;
+            state.clickCount = 0;
+            state.timeLeft = state.totalTime;
+            state.startTime = Date.now();
+            state.lastClickTime = state.startTime;
+            state.maxCps = 0;
+            
+            // 更新UI
+            elements.times.textContent = '0';
+            elements.currentCps.textContent = '0.0';
+            elements.startButton.innerHTML = '<h1>快速点击！</h1>';
+            elements.startButton.classList.add('mdui-color-pink');
+            
+            // 启动计时器
+            state.timerId = setInterval(updateTimer, 100);
+        }
+
+        // 注册点击
+        function registerClick() {
+            if (!state.isTesting) return;
+            
+            state.clickCount++;
+            elements.times.textContent = state.clickCount;
+            
+            // 计算当前CPS
+            const now = Date.now();
+            const timeDiff = (now - state.lastClickTime) / 1000;
+            const currentCps = 1 / timeDiff;
+            
+            if (currentCps > state.maxCps) {
+                state.maxCps = currentCps;
+            }
+            
+            elements.currentCps.textContent = currentCps.toFixed(1);
+            state.lastClickTime = now;
+        }
+
+        // 更新计时器
+        function updateTimer() {
+            state.timeLeft -= 0.1;
+            elements.time.textContent = state.timeLeft.toFixed(1);
+            updateProgressBar();
+            
+            // 更新按钮文本
+            if (state.timeLeft <= 5 && state.timeLeft > 0) {
+                elements.startButton.innerHTML = `<h1>还有${Math.ceil(state.timeLeft)}秒！</h1>`;
+            }
+            
+            // 测试结束
+            if (state.timeLeft <= 0) {
+                endTest();
+            }
+        }
+
+        // 更新进度条
+        function updateProgressBar() {
+            const progress = (state.timeLeft / state.totalTime) * 100;
+            elements.progressBar.style.width = `${progress}%`;
+        }
+
+        // 结束测试
+        function endTest() {
+            clearInterval(state.timerId);
+            state.isTesting = false;
+            
+            // 计算平均CPS
+            const averageCps = state.clickCount / state.totalTime;
+            
+            // 更新结果UI
+            elements.totalClicks.textContent = state.clickCount;
+            elements.averageCps.textContent = averageCps.toFixed(2);
+            elements.maxCps.textContent = state.maxCps.toFixed(2);
+            elements.testDuration.textContent = `${state.totalTime}s`;
+            
+            // 显示结果
+            elements.testArea.style.display = 'none';
+            elements.resultsContainer.style.display = 'block';
+            
+            // 保存到历史记录
+            saveToHistory({
+                clicks: state.clickCount,
+                cps: averageCps,
+                maxCps: state.maxCps,
+                duration: state.totalTime,
+                timestamp: new Date().toLocaleString()
+            });
+            
+            // 重置按钮
+            elements.startButton.innerHTML = '<h1>点击开始测试</h1>';
+            elements.startButton.classList.remove('mdui-color-pink');
+        }
+
+        // 重置测试
+        function resetTest() {
+            elements.testArea.style.display = 'block';
+            elements.resultsContainer.style.display = 'none';
+            state.timeLeft = state.totalTime;
+            elements.time.textContent = state.totalTime;
+            updateProgressBar();
+        }
+
+        // 保存到历史记录
+        function saveToHistory(result) {
+            state.history.unshift(result);
+            if (state.history.length > 10) {
+                state.history = state.history.slice(0, 10);
+            }
+            localStorage.setItem('cpsHistory', JSON.stringify(state.history));
+            renderHistory();
+        }
+
+        // 加载历史记录
+        function loadHistory() {
+            const storedHistory = localStorage.getItem('cpsHistory');
+            if (storedHistory) {
+                state.history = JSON.parse(storedHistory);
+                renderHistory();
+            }
+        }
+
+        // 渲染历史记录
+        function renderHistory() {
+            if (state.history.length === 0) {
+                elements.historyList.innerHTML = '<p class="mdui-text-center mdui-text-color-grey">暂无测试记录</p>';
+                return;
+            }
+            
+            let html = '';
+            state.history.forEach((item, index) => {
+                html += `
+                    <div class="history-item">
+                        <div class="mdui-typo-subheading">测试 #${index + 1} - ${item.timestamp}</div>
+                        <div>点击次数: ${item.clicks} | 平均CPS: ${item.cps.toFixed(2)} | 最高CPS: ${item.maxCps.toFixed(2)} | 时长: ${item.duration}秒</div>
+                    </div>
+                `;
+            });
+            elements.historyList.innerHTML = html;
+        }
+
+        // 清除历史记录
+        function clearHistory() {
+            if (confirm('确定要清除所有历史记录吗？')) {
+                state.history = [];
+                localStorage.removeItem('cpsHistory');
+                renderHistory();
+            }
+        }
+
+        // 分享成绩
+        function shareResults() {
+            const result = state.history[0];
+            const text = `我在CPS测试中取得了 ${result.clicks} 次点击，平均CPS为 ${result.cps.toFixed(2)}，最高CPS为 ${result.maxCps.toFixed(2)}！你也来试试吧！`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: '我的CPS测试成绩',
+                    text: text,
+                    url: window.location.href
+                });
+            } else if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => {
+                    mdui.snackbar('成绩已复制到剪贴板！');
+                });
+            } else {
+                mdui.snackbar('您的浏览器不支持分享功能，请手动复制成绩');
+            }
+        }
+
+        // 初始化应用
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
